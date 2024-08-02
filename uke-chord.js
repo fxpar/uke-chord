@@ -62,9 +62,10 @@
       
       this.fingers = this.fingers ? this.fingers.split("") : [];
       this.sub = this.parseSub(this.sub)
+      this.sub2 = this.parseSub2(this.sub2)
       this.size = this.parseSize(this.size)
       this.r = this.r ? this.r.split("") : [];
-      this.originalPosition = this.position;
+	  this.originalPosition = this.position;
       this.position = parseInt(this.position) || null;
       this.name = (this.name && this.name.length > 0) ? this.name : null
       this.fretCount = this.parseLength(this.length)
@@ -73,7 +74,7 @@
       this.tabWidth = (this.frets.length - 1) * 20 + 2;
       this.viewBoxWidth = this.tabWidth + 30 + (this.position ? 6 : 0);
       this.tabHeight = this.fretCount * 20;
-      this.viewBoxHeight = this.tabHeight + 25 + (this.name ? 25 : 0);
+      this.viewBoxHeight = this.tabHeight + 25 + (this.name ? 25 : 0)+ (this.sub2 ? 25 : 0);
       this.tabX = (this.viewBoxWidth - this.tabWidth)/2;
       this.tabY = 12 + (this.name ? 20 : 0);
       
@@ -141,6 +142,17 @@
           text.innerHTML = this.sub[idx] !== "_" ? this.sub[idx] : '';
           this.$["tab"].appendChild(text)
         }
+		
+		// FXP add sub2 text F
+        if(this.sub2[idx]){
+			console.log("FX sub2");
+          const y = this.tabHeight + 13 +13 ;
+          const text = _node("text", { x, y, 'text-anchor': 'middle' })
+          text.innerHTML = this.sub2[idx] !== "_" ? this.sub2[idx] : '';
+          this.$["tab"].appendChild(text)
+        }		
+		
+		
       });
 
       _translate(this.tabX, this.tabY, this.$.tab);
@@ -151,8 +163,11 @@
 
     // show start position on the left side of the tab
     showPosition() {
+      //const p = this.position;
       const p = this.originalPosition;
+	  //console.log("FX showPosition"+p);
       if (p === "0") {
+		  
         // draw a thick bar at the top representing the nut
         const nut = _node("rect", {x: 0,  y: -1, width: this.tabWidth, fill: 'black', height: 4 })
         this.$["frets"].appendChild(nut)
@@ -175,6 +190,18 @@
         subText = this.sub.split(",");
       } else {
         subText = this.sub.split("");
+      }
+      return subText || [];
+    }
+
+    parseSub2(sub) {
+      let subText;
+      if (!sub) return [];
+      //if using commas in the sub text as separators
+      if (sub.indexOf(",") > 0) {
+        subText = this.sub2.split(",");
+      } else {
+        subText = this.sub2.split("");
       }
       return subText || [];
     }
