@@ -64,6 +64,7 @@
       this.sub = this.parseSub(this.sub)
       this.size = this.parseSize(this.size)
       this.r = this.r ? this.r.split("") : [];
+      this.originalPosition = this.position;
       this.position = parseInt(this.position) || null;
       this.name = (this.name && this.name.length > 0) ? this.name : null
       this.fretCount = this.parseLength(this.length)
@@ -150,8 +151,8 @@
 
     // show start position on the left side of the tab
     showPosition() {
-      const p = this.position;
-      if (p === 0) {
+      const p = this.originalPosition;
+      if (p === "0") {
         // draw a thick bar at the top representing the nut
         const nut = _node("rect", {x: 0,  y: -1, width: this.tabWidth, fill: 'black', height: 4 })
         this.$["frets"].appendChild(nut)
