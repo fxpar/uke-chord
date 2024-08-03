@@ -135,7 +135,7 @@
 				  const y = (parseInt(fret.split("")[i]) - 1) * 20;
 				  const bubble = _use('bubble', { x, y })
 				  this.$["strings"].appendChild(bubble);
-				  const text = _node("text", { x: x + 1, y: y + 15, fill: 'white', 'text-anchor': 'middle' })
+				  const text = _node("text", { x: x + 1, y: y + 15, fill: 'white', stroke:"#FFFFFF", 'text-anchor': 'middle' })
 					text.innerHTML = this.fingers[idx][i] !== "0" ? this.fingers[idx][i] : '';
 					this.$["strings"].appendChild(text)
 			  }
@@ -161,7 +161,7 @@
 				  }
 				  */
 			  }else{
-				const text = _node("text", { x: x + 1, y: y + 15, fill: 'white', 'text-anchor': 'middle' })
+				const text = _node("text", { x: x + 1, y: y + 15, fill: 'white', stroke:"#FFFFFF", 'text-anchor': 'middle' })
 				text.innerHTML = this.fingers[idx] !== "0" ? this.fingers[idx] : '';
 				this.$["strings"].appendChild(text)
 			  }
