@@ -55,12 +55,17 @@
       
       // parameter parsing
       if(this.frets){
-        this.frets = this.frets ? this.frets.split("").slice(0, maxStringCount) : [];
+		  // FXP: trying to split with commas for multiple frets bubbles
+        //this.frets = this.frets ? this.frets.split("").slice(0, maxStringCount) : [];
+		this.frets = this.parseFrets(this.frets);
+		//console.log(this.frets);
       }else{
         throw Error('frets attribute is required')
       }
       
-      this.fingers = this.fingers ? this.fingers.split("") : [];
+	  // trying to have multiple fingers on same string
+      //this.fingers = this.fingers ? this.fingers.split("") : [];
+	  this.fingers = this.parseFingers(this.fingers);
       this.sub = this.parseSub(this.sub)
       this.sub2 = this.parseSub2(this.sub2)
       this.size = this.parseSize(this.size)
@@ -124,14 +129,42 @@
           this.$["strings"].appendChild(ex)
         } else if(parseInt(fret) > 0){
           const y = (parseInt(fret) - 1) * 20;
-          const bubble = _use('bubble', { x, y })
-          this.$["strings"].appendChild(bubble)
+		  //FXP: trying adding multiple bubble per fret
+		  if(fret.split("").length >1){
+			  for(let i=0; i< fret.split("").length; i++){
+				  const y = (parseInt(fret.split("")[i]) - 1) * 20;
+				  const bubble = _use('bubble', { x, y })
+				  this.$["strings"].appendChild(bubble);
+				  const text = _node("text", { x: x + 1, y: y + 15, fill: 'white', 'text-anchor': 'middle' })
+					text.innerHTML = this.fingers[idx][i] !== "0" ? this.fingers[idx][i] : '';
+					this.$["strings"].appendChild(text)
+			  }
+		  }else{
+			  const bubble = _use('bubble', { x, y })
+				  this.$["strings"].appendChild(bubble)
+		  }
 
             // add finger numbers on top of the bubbles
           if(this.fingers[idx]){
-            const text = _node("text", { x: x + 1, y: y + 15, fill: 'white', 'text-anchor': 'middle' })
-            text.innerHTML = this.fingers[idx] !== "0" ? this.fingers[idx] : '';
-            this.$["strings"].appendChild(text)
+			  // trying to add multiple fingers on same string
+			  if(this.fingers[idx].length >1){
+				  /*
+				  console.log(this.fingers[idx]);
+				  console.log('this.fingers[idx].split("").length:'+this.fingers[idx].split("").length)
+				  for(let i=0; i< this.fingers[idx].split("").length ; i++){
+					  console.log(i);
+					  console.log(this.fingers[idx].split("")[i]);
+					const y = (parseInt(this.fingers[idx].split("")[i]) - 1) * 20;
+					const text = _node("text", { x: x + 1, y: y + 15, fill: 'white', 'text-anchor': 'middle' })
+					text.innerHTML = this.fingers[idx][i] !== "0" ? this.fingers[idx][i] : '';
+					this.$["strings"].appendChild(text)
+				  }
+				  */
+			  }else{
+				const text = _node("text", { x: x + 1, y: y + 15, fill: 'white', 'text-anchor': 'middle' })
+				text.innerHTML = this.fingers[idx] !== "0" ? this.fingers[idx] : '';
+				this.$["strings"].appendChild(text)
+			  }
           }
         }
 
@@ -145,7 +178,7 @@
 		
 		// FXP add sub2 text F
         if(this.sub2[idx]){
-			console.log("FX sub2");
+			//console.log("FX sub2");
           const y = this.tabHeight + 13 +13 ;
           const text = _node("text", { x, y, 'text-anchor': 'middle' })
           text.innerHTML = this.sub2[idx] !== "_" ? this.sub2[idx] : '';
@@ -180,6 +213,30 @@
     showName() {
       if(this.name) this.$.chordName.innerHTML = this.name;
       this.$.title.innerHTML = this.name || 'Tab';
+    }
+
+    parseFrets(frets) {
+      let subText;
+      if (!frets) return [];
+      //if using commas in the sub text as separators
+      if (frets.indexOf(",") > 0) {
+        subText = this.frets.split(",");
+      } else {
+        subText = this.frets.split("");
+      }
+      return subText || [];
+    }
+
+    parseFingers(fingers) {
+      let subText;
+      if (!fingers) return [];
+      //if using commas in the sub text as separators
+      if (fingers.indexOf(",") > 0) {
+        subText = this.fingers.split(",");
+      } else {
+        subText = this.fingers.split("");
+      }
+      return subText || [];
     }
 
     parseSub(sub) {
