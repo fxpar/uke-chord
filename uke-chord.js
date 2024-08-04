@@ -55,15 +55,22 @@
       
       // parameter parsing
       if(this.frets){
-        this.frets = this.frets ? this.frets.split("").slice(0, maxStringCount) : [];
+		  // FXP: trying to split with commas for multiple frets bubbles
+        //this.frets = this.frets ? this.frets.split("").slice(0, maxStringCount) : [];
+		this.frets = this.parseFrets(this.frets);
+		//console.log(this.frets);
       }else{
         throw Error('frets attribute is required')
       }
       
-      this.fingers = this.fingers ? this.fingers.split("") : [];
+	  // trying to have multiple fingers on same string
+      //this.fingers = this.fingers ? this.fingers.split("") : [];
+	  this.fingers = this.parseFingers(this.fingers);
       this.sub = this.parseSub(this.sub)
+      this.sub2 = this.parseSub2(this.sub2)
       this.size = this.parseSize(this.size)
       this.r = this.r ? this.r.split("") : [];
+	  this.originalPosition = this.position;
       this.position = parseInt(this.position) || null;
       this.name = (this.name && this.name.length > 0) ? this.name : null
       this.fretCount = this.parseLength(this.length)
@@ -72,7 +79,7 @@
       this.tabWidth = (this.frets.length - 1) * 20 + 2;
       this.viewBoxWidth = this.tabWidth + 30 + (this.position ? 6 : 0);
       this.tabHeight = this.fretCount * 20;
-      this.viewBoxHeight = this.tabHeight + 25 + (this.name ? 25 : 0);
+      this.viewBoxHeight = this.tabHeight + 25 + (this.name ? 25 : 0)+ (this.sub2 ? 25 : 0);
       this.tabX = (this.viewBoxWidth - this.tabWidth)/2;
       this.tabY = 12 + (this.name ? 20 : 0);
       
@@ -122,14 +129,45 @@
           this.$["strings"].appendChild(ex)
         } else if(parseInt(fret) > 0){
           const y = (parseInt(fret) - 1) * 20;
-          const bubble = _use('bubble', { x, y })
-          this.$["strings"].appendChild(bubble)
+		  //FXP: trying adding multiple bubble per fret
+		  if(fret.split("").length >1){
+			  for(let i=0; i< fret.split("").length; i++){
+				  const y = (parseInt(fret.split("")[i]) - 1) * 20;
+				  // try to add Diamond for last of multiple fingers
+				 if (i === fret.split("").length -1){
+					 if(this.r.includes(this.frets.length - idx + '')){
+					 // const y = (parseInt(fret) - 1) * 20;
+					  const diamond = _use('diamond', { x, y })
+					  this.$["strings"].appendChild(diamond)
+					 }
+				 }
+				 
+				  const bubble = _use('bubble', { x, y })
+				  this.$["strings"].appendChild(bubble);
+				  const text = _node("text", { x: x + 1, y: y + 15, fill: 'white', stroke:"#FFFFFF",'text-anchor': 'middle' })
+					text.innerHTML = this.fingers[idx][i] !== "0" ? this.fingers[idx][i] : '';
+					this.$["strings"].appendChild(text)
+				 
+				
+				
+			  }
+		  }else{
+			  const bubble = _use('bubble', { x, y })
+				  this.$["strings"].appendChild(bubble)
+		  }
 
             // add finger numbers on top of the bubbles
           if(this.fingers[idx]){
-            const text = _node("text", { x: x + 1, y: y + 15, fill: 'white', 'text-anchor': 'middle' })
-            text.innerHTML = this.fingers[idx] !== "0" ? this.fingers[idx] : '';
-            this.$["strings"].appendChild(text)
+			  // trying to add multiple fingers on same string
+			  if(this.fingers[idx].length >1){
+				  /*
+					Nothing
+				  */
+			  }else{
+				const text = _node("text", { x: x + 1, y: y + 15, fill: 'white', stroke:"#FFFFFF", 'text-anchor': 'middle' })
+				text.innerHTML = this.fingers[idx] !== "0" ? this.fingers[idx] : '';
+				this.$["strings"].appendChild(text)
+			  }
           }
         }
 
@@ -140,6 +178,17 @@
           text.innerHTML = this.sub[idx] !== "_" ? this.sub[idx] : '';
           this.$["tab"].appendChild(text)
         }
+		
+		// FXP add sub2 text F
+        if(this.sub2[idx]){
+			//console.log("FX sub2");
+          const y = this.tabHeight + 13 +13 ;
+          const text = _node("text", { x, y, 'text-anchor': 'middle' })
+          text.innerHTML = this.sub2[idx] !== "_" ? this.sub2[idx] : '';
+          this.$["tab"].appendChild(text)
+        }		
+		
+		
       });
 
       _translate(this.tabX, this.tabY, this.$.tab);
@@ -150,8 +199,11 @@
 
     // show start position on the left side of the tab
     showPosition() {
-      const p = this.position;
-      if (p === 0) {
+      //const p = this.position;
+      const p = this.originalPosition;
+	  //console.log("FX showPosition"+p);
+      if (p === "0") {
+		  
         // draw a thick bar at the top representing the nut
         const nut = _node("rect", {x: 0,  y: -1, width: this.tabWidth, fill: 'black', height: 4 })
         this.$["frets"].appendChild(nut)
@@ -166,6 +218,30 @@
       this.$.title.innerHTML = this.name || 'Tab';
     }
 
+    parseFrets(frets) {
+      let subText;
+      if (!frets) return [];
+      //if using commas in the sub text as separators
+      if (frets.indexOf(",") > 0) {
+        subText = this.frets.split(",");
+      } else {
+        subText = this.frets.split("");
+      }
+      return subText || [];
+    }
+
+    parseFingers(fingers) {
+      let subText;
+      if (!fingers) return [];
+      //if using commas in the sub text as separators
+      if (fingers.indexOf(",") > 0) {
+        subText = this.fingers.split(",");
+      } else {
+        subText = this.fingers.split("");
+      }
+      return subText || [];
+    }
+
     parseSub(sub) {
       let subText;
       if (!sub) return [];
@@ -174,6 +250,18 @@
         subText = this.sub.split(",");
       } else {
         subText = this.sub.split("");
+      }
+      return subText || [];
+    }
+
+    parseSub2(sub) {
+      let subText;
+      if (!sub) return [];
+      //if using commas in the sub text as separators
+      if (sub.indexOf(",") > 0) {
+        subText = this.sub2.split(",");
+      } else {
+        subText = this.sub2.split("");
       }
       return subText || [];
     }
