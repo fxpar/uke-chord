@@ -7,6 +7,7 @@
     <circle id="bubble" r="6" transform="translate(1,11)"/>
     <path id="ex" d="M0,0L8,8m0,-8L0,8" stroke="black" stroke-width="1.1" transform="translate(-3,-11)"/>
     <circle id="openString" r="4" fill="none" stroke="black" stroke-width="1" transform="translate(1,-7)"/>
+    <circle id="openStringWhite" r="4" fill="none" stroke="white" stroke-width="1" transform="translate(1,-7)"/>
     <rect id="diamond" width="14" height="14" transform="translate(1,2),rotate(45)"></rect>
   </defs>
   <g id="tab">
@@ -122,8 +123,13 @@
         }
         
         if (fret === "0") {
-          const circle = _use('openString', {x})
-          this.$["strings"].appendChild(circle)
+			if(this.r.includes(this.frets.length - idx + '')){
+			  const circle = _use('openStringWhite', {x})
+			  this.$["strings"].appendChild(circle)
+			}else{
+			  const circle = _use('openString', {x})
+			  this.$["strings"].appendChild(circle)
+			}
         } else if(fret === "x" || fret === 'X'){
           const ex = _use('ex', { x })
           this.$["strings"].appendChild(ex)
@@ -133,11 +139,23 @@
 		  if(fret.split("").length >1){
 			  for(let i=0; i< fret.split("").length; i++){
 				  const y = (parseInt(fret.split("")[i]) - 1) * 20;
+				  // try to add Diamond for last of multiple fingers
+				 if (i === fret.split("").length -1){
+					 if(this.r.includes(this.frets.length - idx + '')){
+					 // const y = (parseInt(fret) - 1) * 20;
+					  const diamond = _use('diamond', { x, y })
+					  this.$["strings"].appendChild(diamond)
+					 }
+				 }
+				 
 				  const bubble = _use('bubble', { x, y })
 				  this.$["strings"].appendChild(bubble);
-				  const text = _node("text", { x: x + 1, y: y + 15, fill: 'white', stroke:"#FFFFFF", 'text-anchor': 'middle' })
+				  const text = _node("text", { x: x + 1, y: y + 15, fill: 'white', stroke:"#FFFFFF",'text-anchor': 'middle' })
 					text.innerHTML = this.fingers[idx][i] !== "0" ? this.fingers[idx][i] : '';
 					this.$["strings"].appendChild(text)
+				 
+				
+				
 			  }
 		  }else{
 			  const bubble = _use('bubble', { x, y })
@@ -149,16 +167,7 @@
 			  // trying to add multiple fingers on same string
 			  if(this.fingers[idx].length >1){
 				  /*
-				  console.log(this.fingers[idx]);
-				  console.log('this.fingers[idx].split("").length:'+this.fingers[idx].split("").length)
-				  for(let i=0; i< this.fingers[idx].split("").length ; i++){
-					  console.log(i);
-					  console.log(this.fingers[idx].split("")[i]);
-					const y = (parseInt(this.fingers[idx].split("")[i]) - 1) * 20;
-					const text = _node("text", { x: x + 1, y: y + 15, fill: 'white', 'text-anchor': 'middle' })
-					text.innerHTML = this.fingers[idx][i] !== "0" ? this.fingers[idx][i] : '';
-					this.$["strings"].appendChild(text)
-				  }
+					Nothing
 				  */
 			  }else{
 				const text = _node("text", { x: x + 1, y: y + 15, fill: 'white', stroke:"#FFFFFF", 'text-anchor': 'middle' })
