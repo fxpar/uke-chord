@@ -95,7 +95,7 @@
         this.shadowRoot.appendChild(img)
       }else{
         if(this.hasAttribute('dl')){
-		// FXP : try adding download link
+		// FXP : try adding download link emoji
 		const dataURL = `data:image/svg+xml;utf8,${encodeURIComponent(template.innerHTML.replace(/\s*(\r\n|\n|\r)\s*/gm,""))}`;
 		const dl = document.createElement("a");
 		this.parentNode.appendChild(dl);
