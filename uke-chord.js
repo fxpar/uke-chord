@@ -94,7 +94,18 @@
         img.src = `data:image/svg+xml;utf8,${encodeURIComponent(template.innerHTML.replace(/\s*(\r\n|\n|\r)\s*/gm,""))}`
         this.shadowRoot.appendChild(img)
       }else{
-        // append the SVG inline by appending the template content
+        if(this.hasAttribute('dl')){
+		// FXP : try adding download link
+		const dataURL = `data:image/svg+xml;utf8,${encodeURIComponent(template.innerHTML.replace(/\s*(\r\n|\n|\r)\s*/gm,""))}`;
+		const dl = document.createElement("a");
+		this.parentNode.appendChild(dl);
+		dl.setAttribute("href", dataURL);
+                dl.setAttribute("download", (this.name||"")+"-chord.svg");
+		const dlt = document.createTextNode("⬇️");
+		dl.appendChild(dlt);
+        //dl.click();
+		}
+		// append the SVG inline by appending the template content
         this.shadowRoot.appendChild(template.content);
       }
     }
@@ -124,6 +135,7 @@
         
         if (fret === "0") {
 			if(this.r.includes(this.frets.length - idx + '')){
+				// FXP: show a white circle on a black diamond
 			  const circle = _use('openStringWhite', {x})
 			  this.$["strings"].appendChild(circle)
 			}else{
@@ -290,4 +302,5 @@
   }
 
   customElements.define('uke-chord', UkeChord);
+  
 })();
