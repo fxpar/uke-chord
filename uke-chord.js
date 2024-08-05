@@ -96,6 +96,7 @@
       }else{
         if(this.hasAttribute('dl')){
 		// FXP : try adding download link emoji
+		console.log("DL attribute");
 		const dataURL = `data:image/svg+xml;utf8,${encodeURIComponent(template.innerHTML.replace(/\s*(\r\n|\n|\r)\s*/gm,""))}`;
 		const dl = document.createElement("a");
 		this.parentNode.appendChild(dl);
@@ -106,7 +107,8 @@
         //dl.click();
 		}
 		// append the SVG inline by appending the template content
-        this.shadowRoot.appendChild(template.content);
+	      	console.log("shadow appendchild");
+        	this.shadowRoot.appendChild(template.content);
       }
     }
 
