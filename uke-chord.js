@@ -194,12 +194,38 @@
         const width = (segment.end - segment.start) * 20 + 12;
         const y = (segment.fret - 1) * 20 + 5;
         const barre = _node("rect", { x, y, width, height: 12, rx: 6, ry: 6 });
-        const firstChild = this.$["strings"].firstChild;
-        if(firstChild){
-          this.$["strings"].insertBefore(barre, firstChild);
-        }else{
-          this.$["strings"].appendChild(barre);
+        
+        // --- STYLE SPÉCIFIQUE POUR LA FRETTE 0 ---
+        if (segment.fret === 0) {
+          // Rendre le barré semi-transparent (0.4 = 40% d'opacité) pour la frette 0
+          barre.setAttribute("style", "opacity: 0.4;");
         }
+        // -----------------------------------------
+
+        this.$["strings"].appendChild(barre);
+
+        // --- RAJOUT : DESSINER LES BULLES EN BORDURE INVERSÉE ---
+        for (let idx = segment.start; idx <= segment.end; idx++) {
+          const stringFret = parseInt(this.frets[idx], 10);
+          
+          // On ne dessine la bulle que si la corde fait bien partie du barré à cette frette
+          if (stringFret === segment.fret) {
+            const stringX = idx * 20;
+            // On calcule le y de la bulle (le script d'origine fait : (fret - 1) * 20 )
+            const bubbleY = (stringFret - 1) * 20;
+            
+            // On réutilise la forme de bulle d'origine ('bubble')
+            const invertedBubble = _use('bubble', { x: stringX, y: bubbleY });
+            
+            // On applique le style inversé : pas de fond (transparent) et bordure de la couleur du texte/composant
+            // Si frette 0 (barré transparent), on utilise l'opacité ou une bordure fine pour correspondre.
+            const strokeColor = this.fillColor; 
+            invertedBubble.setAttribute("style", `fill: none; stroke: ${this.fingerTextColor}; stroke-width: 1.5;`);
+            
+            this.$["strings"].appendChild(invertedBubble);
+          }
+        }
+        // --------------------------------------------------------
       });
 
       _translate(this.tabX, this.tabY, this.$.tab);
@@ -264,7 +290,10 @@
       const flush = (endIndex) => {
         if(start !== null){
           const length = endIndex - start;
-          if(length >= 2 && currentFret){
+		  // Modif FXP pour barré sur 0
+          // MODIFICATION : On vérifie explicitement que currentFret n'est pas null ou undefined,
+          // pour accepter la valeur 0.
+          if(length >= 2 && currentFret !== null && currentFret !== undefined){
             segments.push({ start, end: endIndex - 1, fret: currentFret });
           }
         }
@@ -274,8 +303,9 @@
 
       barre.forEach((value, idx) => {
         const barreFret = parseInt(value, 10);
-
-        if(!barreFret || barreFret < 1){
+		// modif FXP pour barré sur 0
+        // MODIFICATION : On accepte 0 (on rejette seulement NaN et les nombres négatifs)
+        if(Number.isNaN(barreFret) || barreFret < 0){
           flush(idx);
           return;
         }
