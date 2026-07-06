@@ -75,6 +75,7 @@
 	  //this.fingers = this.fingers ? this.fingers.split("") : [];
 	  this.fingers = this.parseFingers(this.fingers);
       this.sub = this.parseSub(this.sub)
+	  this.sub2 = this.parseSub(this.sub2)
       this.size = this.parseSize(this.size)
       this.r = this.r ? this.r.split("") : [];
       const barre = this.barre ? this.barre.split("").slice(0, this.frets.length) : [];
@@ -103,8 +104,10 @@
       this.tabWidth = (this.frets.length - 1) * 20 + 2;
       this.viewBoxWidth = this.tabWidth + 30 + (this.position ? 6 : 0);
       this.tabHeight = this.fretCount * 20;
-      this.viewBoxHeight = this.tabHeight + 25 + (this.name ? 25 : 0);
-      this.tabX = (this.viewBoxWidth - this.tabWidth)/2;
+	  // Modif FXP: resize to allow a second level of sub information
+      //this.viewBoxHeight = this.tabHeight + 25 + (this.name ? 25 : 0);
+      this.viewBoxHeight = this.tabHeight + 25 + (this.name ? 25 : 0)+ (this.sub2 ? 25 : 0);
+	  this.tabX = (this.viewBoxWidth - this.tabWidth)/2;
       this.tabY = 12 + (this.name ? 20 : 0);
       
       this.reset();
@@ -174,8 +177,34 @@
           const fretNumber = parseInt(fret, 10);
           if(!(fretNumber > 0)) return;
           const y = (fretNumber - 1) * 20;
-          const bubble = _use('bubble', { x, y })
-          this.$["strings"].appendChild(bubble)
+          // const bubble = _use('bubble', { x, y })
+          // this.$["strings"].appendChild(bubble)
+		  //FXP: trying adding multiple bubble per fret
+		  if(fret.split("").length >1){
+			  for(let i=0; i< fret.split("").length; i++){
+				  const y = (parseInt(fret.split("")[i]) - 1) * 20;
+				  // try to add Diamond for last of multiple fingers
+				 if (i === fret.split("").length -1){
+					 if(this.r.includes(this.frets.length - idx + '')){
+					 // const y = (parseInt(fret) - 1) * 20;
+					  const diamond = _use('diamond', { x, y })
+					  this.$["strings"].appendChild(diamond)
+					 }
+				 }
+				 
+				  const bubble = _use('bubble', { x, y })
+				  this.$["strings"].appendChild(bubble);
+				  const text = _node("text", { x: x + 1, y: y + 15, fill: 'white', stroke:"#FFFFFF",'text-anchor': 'middle' })
+					text.innerHTML = this.fingers[idx][i] !== "0" ? this.fingers[idx][i] : '';
+					this.$["strings"].appendChild(text)
+				 
+				
+				
+			  }
+		  }else{
+			  const bubble = _use('bubble', { x, y })
+				  this.$["strings"].appendChild(bubble)
+		  }
 
           // add finger numbers on top of the bubbles
           if(this.fingers[idx]){
@@ -207,6 +236,16 @@
           text.innerHTML = this.sub[idx] !== "_" ? this.sub[idx] : '';
           this.$["tab"].appendChild(text)
         }
+		
+		// Modif FXP add sub2 text
+        if(this.sub2[idx]){
+			//console.log("FX sub2");
+          const y = this.tabHeight + 13 +13 ;
+          const text = _node("text", { x, y, 'text-anchor': 'middle' })
+          text.innerHTML = this.sub2[idx] !== "_" ? this.sub2[idx] : '';
+          this.$["tab"].appendChild(text)
+        }		
+		
       });
 
       barreSegments.forEach(segment => {
