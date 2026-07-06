@@ -63,12 +63,17 @@
       
       // parameter parsing
       if(this.frets){
-        this.frets = this.frets.split("").slice(0, maxStringCount);
+        // Modif Fxp split fingers with commas to 
+		// have fingers on multiple fingers on one string
+		//this.frets = this.frets.split("").slice(0, maxStringCount);
+		this.frets = this.parseFrets(this.frets);
       }else{
         throw Error('frets attribute is required')
       }
       
-      this.fingers = this.fingers ? this.fingers.split("") : [];
+      // Modif Fxp split fingers
+	  //this.fingers = this.fingers ? this.fingers.split("") : [];
+	  this.fingers = this.parseFingers(this.fingers);
       this.sub = this.parseSub(this.sub)
       this.size = this.parseSize(this.size)
       this.r = this.r ? this.r.split("") : [];
@@ -174,9 +179,24 @@
 
           // add finger numbers on top of the bubbles
           if(this.fingers[idx]){
-            const text = _node("text", { x: x + 1, y: y + 15, 'text-anchor': 'middle' })
-            text.innerHTML = this.fingers[idx] !== "0" ? this.fingers[idx] : '';
-            this.$["strings"].appendChild(text)
+			  
+			if(this.fingers[idx].length >1){
+				  /*
+					Nothing
+				  */
+				  
+				  // const text = _node("text", { x: x + 1, y: y + 15 - 1, fill: 'white', stroke:"#FFFFFF", 'text-anchor': 'middle', style:'font-size: 0.8em;' })
+				const text = _node("text", { x: x + 1, y: y + 15, 'text-anchor': 'middle', style:'font-size: 0.8em;' })
+				text.innerHTML = this.fingers[idx] !== "0" ? this.fingers[idx] : '';
+				this.$["strings"].appendChild(text)
+				  
+				  
+			  }else{
+				const text = _node("text", { x: x + 1, y: y + 15, 'text-anchor': 'middle' })
+				text.innerHTML = this.fingers[idx] !== "0" ? this.fingers[idx] : '';
+				this.$["strings"].appendChild(text)
+			  }
+			  
           }
         }
 
@@ -252,6 +272,30 @@
       this.$.title.innerHTML = this.name || 'Tab';
     }
 
+parseFrets(frets) {
+      let subText;
+      if (!frets) return [];
+      //if using commas in the sub text as separators
+      if (frets.indexOf(",") > 0) {
+        subText = this.frets.split(",");
+      } else {
+        subText = this.frets.split("");
+      }
+      return subText || [];
+    }
+
+    parseFingers(fingers) {
+      let subText;
+      if (!fingers) return [];
+      //if using commas in the sub text as separators
+      if (fingers.indexOf(",") > 0) {
+        subText = this.fingers.split(",");
+      } else {
+        subText = this.fingers.split("");
+      }
+      return subText || [];
+    }
+	  
     parseSub(sub) {
       let subText;
       if (!sub) return [];
@@ -260,6 +304,18 @@
         subText = sub.split(",");
       } else {
         subText = sub.split("");
+      }
+      return subText || [];
+    }
+	
+	parseSub2(sub) {
+      let subText;
+      if (!sub) return [];
+      //if using commas in the sub text as separators
+      if (sub.indexOf(",") > 0) {
+        subText = this.sub2.split(",");
+      } else {
+        subText = this.sub2.split("");
       }
       return subText || [];
     }
